@@ -4,7 +4,7 @@ from database import engine
 #from models import coffee
 from domin.meun import meun_router
 import models
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
