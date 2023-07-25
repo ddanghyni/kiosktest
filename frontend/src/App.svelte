@@ -78,6 +78,7 @@
       {#each menuItems as item}
         <li>
           <h2>{item.name}</h2>
+          <p>ID: {item.id}</p>
           <p class="price">가격: {item.price}</p>
           <p>설명: {item.description}</p>
         </li>
