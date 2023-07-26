@@ -7,6 +7,8 @@ from domain.order import order_router
 #
 import models
 
+
+
 #
 
 app = FastAPI()
@@ -23,6 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+models.Base.metadata.create_all(bind=engine)
 app.include_router(menu_router.router)
 app.include_router(orderer_router.router)
 app.include_router(order_router.router)

@@ -1,10 +1,19 @@
 from pydantic import BaseModel
+class OrderCreate(BaseModel):
+    orderer_id: int
+    menu_pk: int
+    menu_count: int
 
-class Order_(BaseModel):
-    orderer:int
-    menu:int
-    count:int
-    
     class Config():
-        class Config:
-            from_attributes = True
+        from_atrributes = True
+
+class OrderResponse(BaseModel):
+    order_detail_pk: int
+    orderer_id: int
+    menu_pk: int
+    menu_count: int
+    menu_price: int
+    total_price: int
+
+    class Config():
+        from_atrributes = True

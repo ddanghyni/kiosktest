@@ -5,5 +5,4 @@ class Orderer_(BaseModel):
     phone: str
 
     class Config():
-        class Config:
-            from_attributes = True
+        from_attributes = True
