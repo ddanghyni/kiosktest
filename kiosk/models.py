@@ -7,6 +7,7 @@ class Categories(Base):
     __tablename__ = 'categories'
     category_pk = Column(Integer, primary_key=True, autoincrement=True)
     category_name = Column(String, nullable=False)
+    
 
 #! 메뉴 테이블
 
@@ -25,6 +26,9 @@ class Orderer(Base):
     orderer_id = Column(Integer, primary_key=True, autoincrement=True)
     orderer_name = Column(String, nullable=False)
     orderer_phone = Column(String, nullable=False)
+    
+    
+
 
 
 #! 주문 상세 테이블

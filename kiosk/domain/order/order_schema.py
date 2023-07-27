@@ -8,9 +8,10 @@ class OrderCreate(BaseModel):
         from_atrributes = True
 
 class OrderResponse(BaseModel):
-    order_detail_pk: int
+    #order_detail_pk: int
     orderer_id: int
     menu_pk: int
+    menu_name: str
     menu_count: int
     menu_price: int
     total_price: int
