@@ -42,4 +42,7 @@ class OrderDetail(Base):
     menu = relationship('Menu', backref='order_detail')
     menu_count = Column(Integer, nullable=False)
     
+
+
+
     
