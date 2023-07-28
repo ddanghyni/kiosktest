@@ -18,11 +18,7 @@ def get_categories(db: Session = Depends(get_db)):
     categories = db.query(models.Categories).all()
     return categories
 
-#! category_pk로 메뉴 조회
-# @router.get('/menu/{category_pk}', tags = ['카테고리별 메뉴 조회'])
-# def get_menu(category_pk: int, db: Session = Depends(get_db)):
-#     menu = db.query(models.Menu).filter(models.Menu.category_pk == category_pk).all()
-#     return menu
+
 
 #! category_pk로 메뉴 조회
 @router.get('/menu/{category_pk}', response_model=List[MenuCategory], tags=['카테고리별 메뉴 조회'])

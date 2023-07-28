@@ -20,7 +20,7 @@ def get_orderer(db: Session = Depends(get_db)):
     return orderer
 
 #! 고객 정보 등록 orderer_schema.py에 있는 Orderer를 사용
-@router.post('/orderer', tags = ['고객 정보 등록'])
+@router.post('/new_orderer', tags = ['고객 정보 등록'])
 def create_orderer(request: Orderer_, db: Session = Depends(get_db)):
     new_orderer = models.Orderer(orderer_name=request.name, 
                                  orderer_phone=request.phone)  # 수정된 부분
