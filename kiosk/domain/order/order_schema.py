@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 class OrderCreate(BaseModel):
-    orderer_id: int
+    #orderer_id: int
     menu_pk: int
     menu_count: int
 

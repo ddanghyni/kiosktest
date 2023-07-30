@@ -12,56 +12,21 @@ from typing import List
 
 router = APIRouter()
 
-# #! 주문하기
-# @router.post("/order/",tags=['메뉴 주문'] ,response_model=OrderResponse)
-# def create_order(order: OrderCreate, db: Session = Depends(get_db)):
-#     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == order.orderer_id).first()
-#     if not orderer:
-#         raise HTTPException(status_code=404, detail="Orderer not found")
-    
-#     menu = db.query(models.Menu).filter(models.Menu.menu_pk == order.menu_pk).first()
-#     if not menu:
-#         raise HTTPException(status_code=404, detail="Menu not found")
-    
-#     new_order = models.OrderDetail(
-#         orderer_id = order.orderer_id,
-#         menu_pk = order.menu_pk,
-#         menu_count = order.menu_count
-#     )
-#     db.add(new_order)
-#     db.commit()
-#     db.refresh(new_order)
-
-#     # calculate total price
-#     price = menu.menu_price * order.menu_count
-
-#     # return total price as well
-#     return {"orderer_id": new_order.orderer_id,
-#             "menu_pk": new_order.menu_pk,
-#             "menu_name": menu.menu_name,
-#             "menu_count": new_order.menu_count,
-#             "menu_price": menu.menu_price,
-#             "price": price }
-
 #! 주문자의 id를 함수값으로 받아서 주문을 하는 라우터
 
-@router.post("/order/{id}",tags=['메뉴 주문'] ,response_model=OrderResponse)
+@router.post("/order/{id}", tags=['메뉴 주문'], response_model=OrderResponse)
 def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     # Check if the user with the given id exists
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
     
-    # Check if the orderer_id in the request matches the given id
-    if order.orderer_id != id:
-        raise HTTPException(status_code=400, detail="Invalid user")
-    
     menu = db.query(models.Menu).filter(models.Menu.menu_pk == order.menu_pk).first()
     if not menu:
         raise HTTPException(status_code=404, detail="Menu not found")
     
     new_order = models.OrderDetail(
-        orderer_id = order.orderer_id,
+        orderer_id = id,  # Use the id from the path parameter
         menu_pk = order.menu_pk,
         menu_count = order.menu_count
     )
@@ -79,6 +44,15 @@ def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
             "menu_count": new_order.menu_count,
             "menu_price": menu.menu_price,
             "price": price }
+
+
+
+
+
+
+
+
+
 
 
 #! 고객 id에 따른 주문 내역 조회
