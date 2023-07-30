@@ -12,10 +12,12 @@ from typing import List
 
 router = APIRouter()
 
-#! 주문하기
-@router.post("/order/",tags=['메뉴 주문'] ,response_model=OrderResponse)
-def create_order(order: OrderCreate, db: Session = Depends(get_db)):
-    orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == order.orderer_id).first()
+#! 주문자의 id를 함수값으로 받아서 주문을 하는 라우터
+
+@router.post("/order/{id}", tags=['메뉴 주문'], response_model=OrderResponse)
+def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
+    # Check if the user with the given id exists
+    orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
     
@@ -24,7 +26,7 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Menu not found")
     
     new_order = models.OrderDetail(
-        orderer_id = order.orderer_id,
+        orderer_id = id,  # Use the id from the path parameter
         menu_pk = order.menu_pk,
         menu_count = order.menu_count
     )
@@ -41,7 +43,15 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
             "menu_name": menu.menu_name,
             "menu_count": new_order.menu_count,
             "menu_price": menu.menu_price,
-            "price": price}
+            "price": price }
+
+
+
+
+
+
+
+
 
 
 
