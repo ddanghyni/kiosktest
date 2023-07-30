@@ -46,15 +46,6 @@ def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
             "price": price }
 
 
-
-
-
-
-
-
-
-
-
 #! 고객 id에 따른 주문 내역 조회
 @router.get("/order/{orderer_id}",tags=['메뉴 주문 내역 조회'] ,response_model=OrderSummary)
 def read_order(orderer_id: int, db: Session = Depends(get_db)):
