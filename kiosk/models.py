@@ -41,6 +41,25 @@ class OrderDetail(Base):
     menu_pk = Column(Integer, ForeignKey('menu.menu_pk'))
     menu = relationship('Menu', backref='order_detail')
     menu_count = Column(Integer, nullable=False)
+
+
+#!! 옵션 추가 테이블 !!
+
+class Option(Base):
+    __tablename__ = 'options'
+    option_pk = Column(Integer, primary_key=True, autoincrement=True)
+    option_name = Column(String, nullable=False)
+    option_price = Column(Integer, nullable=False)
+
+class OrderOption(Base):
+    __tablename__ = 'order_option'
+    order_option_pk = Column(Integer, primary_key=True, autoincrement=True)
+    order_detail_pk = Column(Integer, ForeignKey('order_detail.order_detail_pk'), nullable=False)
+    option_pk = Column(Integer, ForeignKey('options.option_pk'), nullable=False)
+    option = relationship('Option', backref='order_option')
+    order_detail = relationship('OrderDetail', backref='order_option')
+
+
     
 
 
