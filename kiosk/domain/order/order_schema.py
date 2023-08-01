@@ -6,7 +6,7 @@ class OrderCreate(BaseModel):
     #orderer_id: int
     menu_pk: int
     menu_count: int
-    options: List[int] = []
+   
 
     class Config():
         from_attributes = True
@@ -19,7 +19,7 @@ class OrderResponse(BaseModel):
     menu_count: int
     menu_price: int
     price: int
-    options: List[str] = []
+
     
     class Config():
         from_attributes = True
