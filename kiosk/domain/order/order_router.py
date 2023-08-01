@@ -97,7 +97,7 @@ def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
 #         "total_price": total_price
 #     }
 
-
+#TODO 옵션 보이게 하기
 @router.get("/order/{orderer_id}", tags=['메뉴 주문 내역 조회'], response_model=OrderSummaryDetail)
 def read_order(orderer_id: int, db: Session = Depends(get_db)):
     # Check if the user with the given id exists
@@ -105,11 +105,7 @@ def read_order(orderer_id: int, db: Session = Depends(get_db)):
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
 
-    orders = db.query(models.OrderDetail)\
-                .options(joinedload(models.OrderDetail.options))\
-                .filter(models.OrderDetail.orderer_id == orderer_id)\
-                .all()
-
+    orders = db.query(models.OrderDetail).filter(models.OrderDetail.orderer_id == orderer_id).all()
     if not orders:
         raise HTTPException(status_code=404, detail="No orders found for this orderer")
 
@@ -122,27 +118,18 @@ def read_order(orderer_id: int, db: Session = Depends(get_db)):
         price = menu_price
         total_price += price
 
-        options = []
-        if order.options:
-            for option in order.options:
-                options.append(Option(option_name=option.option_name, option_price=option.option_price))
-            order_info = OrderResponse(
-                orderer_id = order.orderer_id,
-                menu_pk = order.menu_pk,
-                menu_name = order.menu.menu_name,
-                menu_price = menu_price,
-                price = price,
-                options = options
-            )
-        else:
-            order_info = OrderResponse(
-                orderer_id = order.orderer_id,
-                menu_pk = order.menu_pk,
-                menu_name = order.menu.menu_name,
-                menu_price = menu_price,
-                price = price,
-            )
+        option = db.query(models.Option).filter(models.Option.option_pk == order.option_pk).first()
+        if option:
+            price += option.option_price
 
+        order_info = OrderResponse(
+            orderer_id = order.orderer_id,
+            menu_pk = order.menu_pk,
+            menu_name = order.menu.menu_name,
+            menu_price = menu_price,
+            price = price,
+            options = [Option(option_name=option.option_name, option_price=option.option_price)] if option else []
+        )
         response.append(order_info)
 
     return {
