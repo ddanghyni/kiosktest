@@ -59,10 +59,12 @@ def read_order(orderer_id: int, db: Session = Depends(get_db)):
 
     response = []
     total_price = 0
+    total_count = 0
     for order in orders:
         menu_price = order.menu.menu_price
         price = menu_price * order.menu_count
         total_price += price
+        total_count += order.menu_count
         order_info = OrderResponse(
             orderer_id = order.orderer_id,
             menu_pk = order.menu_pk,
@@ -73,7 +75,7 @@ def read_order(orderer_id: int, db: Session = Depends(get_db)):
         )
         response.append(order_info)
 
-    return {"orderer_name": orderer.orderer_name,"orders": response, "total_price": total_price}
+    return {"orderer_name": orderer.orderer_name,"orders": response, "total_count": total_count, "total_price": total_price}
 
 
 
