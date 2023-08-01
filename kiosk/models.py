@@ -43,7 +43,7 @@ class OrderDetail(Base):
     orderer_id = Column(Integer, ForeignKey('kiosk.orderer.orderer_id'))
     order = relationship('Orderer', backref='order_detail')
     menu_pk = Column(Integer, ForeignKey('kiosk.menu.menu_pk'))
-    menu = relationship('Menu', backref='order_detail')
+    menu = relationship('Menu', backref='order_detail', lazy="joined") # lazy="joined" 추가
     menu_count = Column(Integer, nullable=False)
     
 
