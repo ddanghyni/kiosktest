@@ -2,6 +2,12 @@ from database import Base
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
 
+order_option = Table(
+    'order_option',
+    Base.metadata,
+    Column('order_detail_pk', Integer, ForeignKey('kiosk.order_detail.order_detail_pk')),
+    Column('option_pk', Integer, ForeignKey('kiosk.option.option_pk'))
+)   
 
 # 옵션 테이블
 class Option(Base):
@@ -10,7 +16,7 @@ class Option(Base):
     option_pk = Column(Integer, primary_key=True, autoincrement=True)
     option_name = Column(String(50), nullable=False)
     option_price = Column(Integer, nullable=False)
-
+    order_details = relationship('OrderDetail', secondary=order_option, back_populates='options')#!추가
 
 # 카테고리 목록 테이블
 class Categories(Base):
@@ -39,7 +45,9 @@ class Orderer(Base):
     orderer_id = Column(Integer, primary_key=True, index = True)
     orderer_name = Column(String(50), nullable=False)
     orderer_phone = Column(String(50), nullable=False)
-    
+
+
+
 
 # 주문 상세 테이블
 class OrderDetail(Base):
@@ -51,9 +59,8 @@ class OrderDetail(Base):
     menu_pk = Column(Integer, ForeignKey('kiosk.menu.menu_pk'))
     menu = relationship('Menu', backref='order_details', lazy="joined")
     option_pk = Column(Integer, ForeignKey('kiosk.option.option_pk'))
-    option = relationship('Option', backref='order_details', lazy="joined")
-
-
+    option = relationship('Option', backref='order_details', lazy="joined")  # 추가된 줄
+    options = relationship('Option', secondary=order_option, back_populates='order_details') #! 추가
 
 
 
