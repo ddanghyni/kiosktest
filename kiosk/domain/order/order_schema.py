@@ -1,22 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
-#!#########option###########
-class OptionCreate(BaseModel):
-    option_name: str
-    option_price: int
-    options: List[int] = []
 
-    class Config():
-        from_attributes = True
-class Option(BaseModel):
-    option_pk: int
-    option_name: str
-    option_price: int
-
-    class Config():
-        from_attributes = True
-#!###########################
 class OrderCreate(BaseModel):
     #orderer_id: int
     menu_pk: int
