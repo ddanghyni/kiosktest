@@ -1,91 +1,201 @@
+<script>
+  import { onMount } from 'svelte';
+  let categories = [];
+  let menus = [];
+  let showCustomerInfo = false;
+  let showCategories = false;
+  let name = '';
+  let phone = '';
 
- <script>
-  let page = '';
-  let menuType = '';
-  let menuItems = [];
+  const orderButton = '주문';
+  const inquiryButton = '문의';
 
-  async function get_menu_list(menuType) {
-    const response = await fetch(`http://127.0.0.1:8000/meun/list/${menuType}`);
-    const data = await response.json();
-    menuItems = data;
+  async function openCustomerInfoModal() {
+    showCustomerInfo = true;
   }
 
-  function setMenuType(type) {
-    menuType = type;
-    get_menu_list(type);
+  async function handleInquiry() {
+    // 문의 버튼을 클릭하면 실행할 로직을 여기에 작성해주세요.
   }
 
-  function goToPage(newPage) {
-    page = newPage;
-    if (newPage !== 'order') {
-      menuType = '';
-      menuItems = [];
+  async function submitOrder() {
+    const response = await fetch('http://127.0.0.1:8000/new_orderer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: name,
+        phone: phone
+      })
+    });
+    if (response.ok) {
+      showCustomerInfo = false;
+      showCategories = true;
+      loadCategories();
     }
+  }
+
+  async function loadCategories() {
+    const response = await fetch('http://127.0.0.1:8000/categories');
+
+    if (response.ok) {
+      categories = await response.json();
+    } else {
+      console.error(`Error: ${response.statusText}`);
+    }
+  }
+
+  async function loadMenus(category_pk) {
+    const response = await fetch(`http://127.0.0.1:8000/menu/${category_pk}`);
+
+    if (response.ok) {
+      menus = await response.json();
+      showCategories = false;
+    } else {
+      console.error(`Error: ${response.statusText}`);
+    }
+  }
+
+  function backToCategories() {
+    showCategories = true;
+    menus = [];
   }
 </script>
 
+<div class="welcomeBox">
+  <h2>영남 커피숍에 오신걸 환영합니다</h2>
+  <div class="buttonGroup">
+    <button on:click={openCustomerInfoModal} class="orderButton">{orderButton}</button>
+    <button on:click={handleInquiry} class="inquiryButton">{inquiryButton}</button>
+  </div>
+</div>
+
+{#if showCustomerInfo}
+<div class="customerInfoModal">
+  <div>
+    <label for="name">이름:</label>
+    <input type="text" id="name" bind:value={name} />
+  </div>
+  <div>
+    <label for="phone">전화번호:</label>
+    <input type="text" id="phone" bind:value={phone} />
+  </div>
+  <div>
+    <button on:click={submitOrder} class="submitOrderButton">주문</button>
+  </div>
+</div>
+{/if}
+
+{#if showCategories}
+<div class="categoryGroup">
+  {#each categories as category}
+  <button on:click={() => loadMenus(category.category_pk)} class="categoryButton">{category.category_name}</button>
+  {/each}
+</div>
+{:else}
+<div class="menuGroup">
+  <button on:click={backToCategories} class="backButton">뒤로 가기</button>
+  {#each menus as menu}
+  <div class="menuItem">
+    <h3>{menu.menu_name}</h3>
+    <p>{menu.menu_price}원</p>
+    <p>{menu.menu_description}</p>
+  </div>
+  {/each}
+</div>
+{/if}
+
 <style>
-  .main-button {
-    background-color: #4CAF50; /* Green */
-    border: none;
+  .welcomeBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+    background-color: #2ECC71;
     color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
+    font-size: 1.5em;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+  }
+
+  .buttonGroup {
+    margin-top: 20px;
+  }
+
+  .orderButton,
+  .inquiryButton,
+  .submitOrderButton,
+  .categoryButton,
+  .backButton {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #27AE60;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
     cursor: pointer;
-    border-radius: 12px;
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
+  .orderButton:hover,
+  .inquiryButton:hover,
+  .submitOrderButton:hover,
+  .categoryButton:hover,
+  .backButton:hover {
+    background-color: #229954;
   }
 
-  li {
-    border: 1px solid #ccc;
-    margin-bottom: 1em;
-    padding: 1em;
-    border-radius: 0.5em;
+  .customerInfoModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+    background-color: #2ECC71;
+    color: white;
+    font-size: 1.2em;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
   }
 
-  h2 {
-    margin: 0 0 0.5em 0;
-    color: #333;
+  .categoryGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+    background-color: #2ECC71;
   }
 
-  p {
-    margin: 0.5em 0;
+  .menuGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+    background-color: #2ECC71;
   }
 
-  .price {
-    font-weight: bold;
+  .menuItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+    padding: 20px;
+    width: 200px;
+    background-color: #27AE60;
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
   }
 </style>
-
-{#if page === ''}
-  <button class="main-button" on:click={() => goToPage('order')}>주문</button>
-  <button class="main-button" on:click={() => goToPage('inquiry')}>문의</button>
-{:else if page === 'order'}
-  <button class="main-button" on:click={() => setMenuType('coffee')}>커피</button>
-  <button class="main-button" on:click={() => setMenuType('smoothie')}>스무디</button>
-  <button class="main-button" on:click={() => setMenuType('tea')}>티</button>
-  <button class="main-button" on:click={() => setMenuType('cake')}>케이크</button>
-  {#if menuType !== ''}
-    <ul>
-      {#each menuItems as item}
-        <li>
-          <h2>{item.name}</h2>
-          <p class="price">가격: {item.price}</p>
-          <p>설명: {item.description}</p>
-        </li>
-      {/each}
-    </ul>
-    <button class="main-button" on:click={() => goToPage('')}>뒤로 가기</button>
-  {/if}
-{:else if page === 'inquiry'}
-  <!-- 문의 페이지 내용을 여기에 넣으세요 -->
-  <button class="main-button" on:click={() => goToPage('')}>뒤로 가기</button>
-{/if}
