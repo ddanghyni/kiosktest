@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
+
 class Option(BaseModel):
     option_name: str
     option_price: int
@@ -26,13 +27,15 @@ class OrderResponse(BaseModel):
     class Config():
         from_attributes = True
 
-class OrderSummary(BaseModel):
+
+class OrderSummaryDetail(BaseModel):
     orderer_name: str
     orders: List[OrderResponse]
+    total_menu_count: int
     total_price: int
 
     class Config():
-        from_attributes = True     
+        from_attributes = True
 
 
 
