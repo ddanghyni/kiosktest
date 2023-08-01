@@ -1,12 +1,22 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import sys
+sys.path.append('/Users/ddanghyni0425/mysql/main')
+import json
 
-SQLALCHAMY_DATABASE_URL = 'sqlite:///./kiosk__.db'
+SECRET_FILE = '/Users/ddanghyni0425/mysql/main/secrets.json'
 
+with open(SECRET_FILE, 'r') as f:
+    secrets = json.load(f)
 
-engine = create_engine(SQLALCHAMY_DATABASE_URL, 
-            connect_args={"check_same_thread": False})
+DB = secrets['DB']
+
+DB_URL = f"mysql+pymysql://{DB['USER']}:{DB['PASSWORD']}@{DB['HOST']}:{DB['PORT']}/{DB['NAME']}?charset=utf8"
+
+engine = create_engine(
+    DB_URL
+)
 
 SessionLocal = sessionmaker(autocommit=False, 
                             autoflush=False, 
@@ -14,10 +24,10 @@ SessionLocal = sessionmaker(autocommit=False,
 
 Base = declarative_base()
 
-
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
