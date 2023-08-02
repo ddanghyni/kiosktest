@@ -2,14 +2,20 @@ from database import Base
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
 
-
 # 옵션 테이블
+# 1. Option 모델 선언
 class Option(Base):
     __tablename__ = 'option'
     __table_args__ = {'schema': 'kiosk'}
     option_pk = Column(Integer, primary_key=True, autoincrement=True)
     option_name = Column(String(50), nullable=False)
     option_price = Column(Integer, nullable=False)
+# 2. order_option 연결 테이블 선언
+order_option = Table(
+    'order_option', Base.metadata,
+    Column('order_detail_pk', Integer, ForeignKey('kiosk.order_detail.order_detail_pk')),
+    Column('option_pk', Integer, ForeignKey('kiosk.option.option_pk'))
+)
 
 
 # 카테고리 목록 테이블
@@ -41,17 +47,14 @@ class Orderer(Base):
     orderer_phone = Column(String(50), nullable=False)
     
 
-# 주문 상세 테이블
 class OrderDetail(Base):
     __tablename__ = 'order_detail'
     __table_args__ = {'schema': 'kiosk'}
     order_detail_pk = Column(Integer, primary_key=True, autoincrement=True)
     orderer_id = Column(Integer, ForeignKey('kiosk.orderer.orderer_id'))
-    order = relationship('Orderer', backref='order_details')
     menu_pk = Column(Integer, ForeignKey('kiosk.menu.menu_pk'))
-    menu = relationship('Menu', backref='order_details', lazy="joined")
-    option_pk = Column(Integer, ForeignKey('kiosk.option.option_pk'))
-    option = relationship('Option', backref='order_details', lazy="joined")
+    # options 관계 선언
+    options = relationship('Option', secondary=order_option, backref='order_details')
 
 
 
