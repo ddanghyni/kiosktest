@@ -1,6 +1,6 @@
 import sys
 sys.path.append('/Users/ddanghyni0425/kiosktest/kiosk/domain/order')
-from order_schema import OrderCreate, OrderResponse,OrderSummaryDetail, Option
+from order_schema import OrderCreate, OrderResponse,OrderSummary
 import sys
 sys.path.append('/Users/ddanghyni0425/kiosktest/kiosk')
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -55,90 +55,53 @@ def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     }
 
 
-# @router.get("/order/{orderer_id}", tags=['메뉴 주문 내역 조회'], response_model=OrderSummaryDetail)
-# def read_order(orderer_id: int, db: Session = Depends(get_db)):
-#     # Check if the user with the given id exists
-#     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == orderer_id).first()
-#     if not orderer:
-#         raise HTTPException(status_code=404, detail="Orderer not found")
+#! 주문자 id를 받아서 주문 내역을 조회하는 라우터
 
-#     orders = db.query(models.OrderDetail).filter(models.OrderDetail.orderer_id == orderer_id).all()
-#     if not orders:
-#         raise HTTPException(status_code=404, detail="No orders found for this orderer")
-
-#     total_menu_count = len(orders)  # calculate total menu count
-
-#     response = []
-#     total_price = 0
-#     for order in orders:
-#         menu_price = order.menu.menu_price
-#         price = menu_price
-#         total_price += price
-
-#         options = []
-#         if hasattr(order, 'options'):
-#             for option in order.options:
-#                 options.append(Option(option_name=option.option_name, option_price=option.option_price))
-
-#         order_info = OrderResponse(
-#             orderer_id = order.orderer_id,
-#             menu_pk = order.menu_pk,
-#             menu_name = order.menu.menu_name,
-#             menu_price = menu_price,
-#             price = price,
-#             options = options
-#         )
-#         response.append(order_info)
-
-#     return {
-#         "orderer_name": orderer.orderer_name,
-#         "orders": response,
-#         "total_menu_count": total_menu_count,
-#         "total_price": total_price
-#     }
-
-#TODO 옵션 보이게 하기
-@router.get("/order/{orderer_id}", tags=['메뉴 주문 내역 조회'], response_model=OrderSummaryDetail)
-def read_order(orderer_id: int, db: Session = Depends(get_db)):
-    # Check if the user with the given id exists
+@router.get("/order_check/{orderer_id}", tags=['메뉴 주문 내역 조회'])
+def read_orders(orderer_id: int, db: Session = Depends(get_db)):
+    # 주문자 정보 조회
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == orderer_id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
 
+    # 주문 정보 조회
     orders = db.query(models.OrderDetail).filter(models.OrderDetail.orderer_id == orderer_id).all()
     if not orders:
-        raise HTTPException(status_code=404, detail="No orders found for this orderer")
-
-    total_menu_count = len(orders)  # calculate total menu count
+        raise HTTPException(status_code=404, detail="Orders not found")
 
     response = []
     total_price = 0
+    total_menu_count = 0
     for order in orders:
-        menu_price = order.menu.menu_price
-        price = menu_price
-        total_price += price
+        menu = db.query(models.Menu).filter(models.Menu.menu_pk == order.menu_pk).first()
+        if not menu:
+            continue
 
-        option = db.query(models.Option).filter(models.Option.option_pk == order.option_pk).first()
-        if option:
-            price += option.option_price
+        options = db.query(models.Option).filter(models.Option.order_details.any(order_detail_pk=order.order_detail_pk)).all()
+        options_list = [{"option_name": option.option_name, "option_price": option.option_price} for option in options]
 
-        order_info = OrderResponse(
-            orderer_id = order.orderer_id,
-            menu_pk = order.menu_pk,
-            menu_name = order.menu.menu_name,
-            menu_price = menu_price,
-            price = price,
-            options = [Option(option_name=option.option_name, option_price=option.option_price)] if option else []
+        order_price = menu.menu_price + sum(option.option_price for option in options)
+
+        # 주문 요약 정보 생성
+        order_summary = OrderSummary(
+            orderer_id=order.orderer_id,
+            menu_pk=menu.menu_pk,
+            menu_name=menu.menu_name,
+            menu_price=menu.menu_price,
+            options=options_list,
+            total_price=order_price
         )
-        response.append(order_info)
+
+        total_price += order_price
+        total_menu_count += 1
+        response.append(order_summary)
 
     return {
         "orderer_name": orderer.orderer_name,
         "orders": response,
         "total_menu_count": total_menu_count,
-        "total_price": total_price
+        "Final payment amount": total_price
     }
-
 
 
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class Option(BaseModel):
@@ -21,21 +21,27 @@ class OrderResponse(BaseModel):
     menu_pk: int
     menu_name: str
     menu_price: int
-    options: List[Option] = []
+    options: Optional[List[Option]] = []
     price: int
 
     class Config():
         from_attributes = True
 
 
-class OrderSummaryDetail(BaseModel):
-    orderer_name: str
-    orders: List[OrderResponse]
-    total_menu_count: int
+
+class OrderSummary(BaseModel):
+    orderer_id: int
+    menu_pk: int
+    menu_name: str
+    menu_price: int
+    options: Optional[List[Option]] = []
     total_price: int
 
     class Config():
         from_attributes = True
+
+
+
 
 
 
