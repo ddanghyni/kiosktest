@@ -10,11 +10,13 @@ import models
 from typing import List
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=['주문']
+)
 
 #! 주문자의 id를 함수값으로 받아서 주문을 하는 라우터
-@router.post("/order/{id}", tags=['메뉴 주문'], response_model=OrderResponse)
-def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
+@router.post("/order/{id}",response_model=OrderResponse)
+def 메뉴_주문(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     # Check if the user with the given id exists
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == id).first()
     if not orderer:
@@ -57,8 +59,8 @@ def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
 
 #! 주문자 id를 받아서 주문 내역을 조회하는 라우터
 
-@router.get("/order_check/{orderer_id}", tags=['메뉴 주문 내역 조회'])
-def read_orders(orderer_id: int, db: Session = Depends(get_db)):
+@router.get("/order_check/{orderer_id}")
+def 고객_주문_내역_조회(orderer_id: int, db: Session = Depends(get_db)):
     # 주문자 정보 조회
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == orderer_id).first()
     if not orderer:
@@ -84,8 +86,8 @@ def read_orders(orderer_id: int, db: Session = Depends(get_db)):
 
         # 주문 요약 정보 생성
         order_summary = OrderSummary(
-            orderer_id=order.orderer_id,
-            menu_pk=menu.menu_pk,
+            #orderer_id=order.orderer_id,
+            #menu_pk=menu.menu_pk,
             menu_name=menu.menu_name,
             menu_price=menu.menu_price,
             options=options_list,

@@ -30,8 +30,8 @@ class OrderResponse(BaseModel):
 
 
 class OrderSummary(BaseModel):
-    orderer_id: int
-    menu_pk: int
+    #orderer_id: int
+    #menu_pk: int
     menu_name: str
     menu_price: int
     options: Optional[List[Option]] = []

@@ -10,19 +10,21 @@ import models
 from typing import List
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=['메뉴']
+)
 
 #! 카테고리 목록 조회
-@router.get('/categories', tags = ['카테고리 목록 조회'])
-def get_categories(db: Session = Depends(get_db)):
+@router.get('/categories')
+def 카테고리_목록_조회(db: Session = Depends(get_db)):
     categories = db.query(models.Categories).all()
     return categories
 
 
 
 #! category_pk로 메뉴 조회
-@router.get('/menu/{category_pk}', response_model=List[MenuCategory], tags=['카테고리별 메뉴 조회'])
-def get_menu(category_pk: int, db: Session = Depends(get_db)):
+@router.get('/menu/{category_pk}', response_model=List[MenuCategory])
+def 카테고리별_메뉴_조회(category_pk: int, db: Session = Depends(get_db)):
     menus = db.query(models.Menu).options(joinedload(models.Menu.category)).filter(models.Menu.category_pk == category_pk).all()
     return [{"menu_pk": menu.menu_pk, 
              "menu_name": menu.menu_name, 
