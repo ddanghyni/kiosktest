@@ -4,17 +4,20 @@ from sqlalchemy.orm import relationship
 
 # 옵션 테이블
 # 1. Option 모델 선언
-class Option(Base):
-    __tablename__ = 'option'
+class Option_(Base):
+    __tablename__ = 'option_'
     __table_args__ = {'schema': 'kiosk'}
     option_pk = Column(Integer, primary_key=True, autoincrement=True)
     option_name = Column(String(50), nullable=False)
     option_price = Column(Integer, nullable=False)
+
+
+# 2. order_option 연결 테이블 선언
 # 2. order_option 연결 테이블 선언
 order_option = Table(
     'order_option', Base.metadata,
     Column('order_detail_pk', Integer, ForeignKey('kiosk.order_detail.order_detail_pk')),
-    Column('option_pk', Integer, ForeignKey('kiosk.option.option_pk'))
+    Column('option_pk', Integer, ForeignKey('kiosk.option_.option_pk')) # 수정
 )
 
 
@@ -54,7 +57,7 @@ class OrderDetail(Base):
     orderer_id = Column(Integer, ForeignKey('kiosk.orderer.orderer_id'))
     menu_pk = Column(Integer, ForeignKey('kiosk.menu.menu_pk'))
     # options 관계 선언
-    options = relationship('Option', secondary=order_option, backref='order_details')
+    options = relationship('Option_', secondary=order_option, backref='order_details')  # 수정
 
 
 

@@ -14,10 +14,9 @@ router = APIRouter(
     tags=['주문']
 )
 
-#! 주문자의 id를 함수값으로 받아서 주문을 하는 라우터
+
 @router.post("/order/{id}",response_model=OrderResponse)
 def 메뉴_주문(id: int, order: OrderCreate, db: Session = Depends(get_db)):
-    # Check if the user with the given id exists
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
@@ -26,23 +25,21 @@ def 메뉴_주문(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     if not menu:
         raise HTTPException(status_code=404, detail="Menu not found")
 
-    # total price starts from the menu price
     total_price = menu.menu_price
 
-    # check if options exist and calculate total price
     selected_options = []
     for option_pk in order.options:
-        option = db.query(models.Option).filter(models.Option.option_pk == option_pk).first()
+        option = db.query(models.Option_).filter(models.Option_.option_pk == option_pk).first()  # 수정
         if not option:
             raise HTTPException(status_code=404, detail=f"Option with pk={option_pk} not found")
         selected_options.append(option)
         total_price += option.option_price
 
     new_order = models.OrderDetail(
-        orderer_id = id,  # Use the id from the path parameter
+        orderer_id = id,
         menu_pk = order.menu_pk,
     )
-    new_order.options = selected_options  # 이 줄을 추가하였습니다.
+    new_order.options = selected_options
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
@@ -57,16 +54,12 @@ def 메뉴_주문(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     }
 
 
-#! 주문자 id를 받아서 주문 내역을 조회하는 라우터
-
 @router.get("/order_check/{orderer_id}")
 def 고객_주문_내역_조회(orderer_id: int, db: Session = Depends(get_db)):
-    # 주문자 정보 조회
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == orderer_id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
 
-    # 주문 정보 조회
     orders = db.query(models.OrderDetail).filter(models.OrderDetail.orderer_id == orderer_id).all()
     if not orders:
         raise HTTPException(status_code=404, detail="Orders not found")
@@ -79,15 +72,12 @@ def 고객_주문_내역_조회(orderer_id: int, db: Session = Depends(get_db)):
         if not menu:
             continue
 
-        options = db.query(models.Option).filter(models.Option.order_details.any(order_detail_pk=order.order_detail_pk)).all()
+        options = db.query(models.Option_).filter(models.Option_.order_details.any(order_detail_pk=order.order_detail_pk)).all()  # 수정
         options_list = [{"option_name": option.option_name, "option_price": option.option_price} for option in options]
 
         order_price = menu.menu_price + sum(option.option_price for option in options)
 
-        # 주문 요약 정보 생성
         order_summary = OrderSummary(
-            #orderer_id=order.orderer_id,
-            #menu_pk=menu.menu_pk,
             menu_name=menu.menu_name,
             menu_price=menu.menu_price,
             options=options_list,
