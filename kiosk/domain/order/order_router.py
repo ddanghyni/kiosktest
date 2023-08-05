@@ -1,6 +1,6 @@
 import sys
 sys.path.append('/Users/ddanghyni0425/kiosktest/kiosk/domain/order')
-from order_schema import OrderCreate, OrderResponse, OrderSummary
+from order_schema import OrderCreate, OrderResponse,OrderSummary
 import sys
 sys.path.append('/Users/ddanghyni0425/kiosktest/kiosk')
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -10,13 +10,13 @@ import models
 from typing import List
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=['주문']
+)
 
-#! 주문자의 id를 함수값으로 받아서 주문을 하는 라우터
 
-@router.post("/order/{id}", tags=['메뉴 주문'], response_model=OrderResponse)
-def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
-    # Check if the user with the given id exists
+@router.post("/order/{id}",response_model=OrderResponse)
+def 메뉴_주문(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
@@ -24,56 +24,77 @@ def create_order(id: int, order: OrderCreate, db: Session = Depends(get_db)):
     menu = db.query(models.Menu).filter(models.Menu.menu_pk == order.menu_pk).first()
     if not menu:
         raise HTTPException(status_code=404, detail="Menu not found")
-    
+
+    total_price = menu.menu_price
+
+    selected_options = []
+    for option_pk in order.options:
+        option = db.query(models.Option_).filter(models.Option_.option_pk == option_pk).first()  # 수정
+        if not option:
+            raise HTTPException(status_code=404, detail=f"Option with pk={option_pk} not found")
+        selected_options.append(option)
+        total_price += option.option_price
+
     new_order = models.OrderDetail(
-        orderer_id = id,  # Use the id from the path parameter
+        orderer_id = id,
         menu_pk = order.menu_pk,
-        menu_count = order.menu_count
     )
+    new_order.options = selected_options
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
 
-    # calculate total price
-    price = menu.menu_price * order.menu_count
-
-    # return total price as well
-    return {"orderer_id": new_order.orderer_id,
-            "menu_pk": new_order.menu_pk,
-            "menu_name": menu.menu_name,
-            "menu_count": new_order.menu_count,
-            "menu_price": menu.menu_price,
-            "price": price }
+    return {
+        "orderer_id": new_order.orderer_id,
+        "menu_pk": new_order.menu_pk,
+        "menu_name": menu.menu_name,
+        "menu_price": menu.menu_price,
+        "price": total_price,
+        "options": [{"option_name": option.option_name, "option_price": option.option_price} for option in selected_options]
+    }
 
 
-#! 고객 id에 따른 주문 내역 조회
-@router.get("/order/{orderer_id}",tags=['메뉴 주문 내역 조회'] ,response_model=OrderSummary)
-def read_order(orderer_id: int, db: Session = Depends(get_db)):
+@router.get("/order_check/{orderer_id}")
+def 고객_주문_내역_조회(orderer_id: int, db: Session = Depends(get_db)):
     orderer = db.query(models.Orderer).filter(models.Orderer.orderer_id == orderer_id).first()
     if not orderer:
         raise HTTPException(status_code=404, detail="Orderer not found")
 
-    orders = db.query(models.OrderDetail).options(joinedload(models.OrderDetail.menu)).filter(models.OrderDetail.orderer_id == orderer_id).all()
+    orders = db.query(models.OrderDetail).filter(models.OrderDetail.orderer_id == orderer_id).all()
     if not orders:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Orders not found")
 
     response = []
     total_price = 0
+    total_menu_count = 0
     for order in orders:
-        menu_price = order.menu.menu_price
-        price = menu_price * order.menu_count
-        total_price += price
-        order_info = OrderResponse(
-            orderer_id = order.orderer_id,
-            menu_pk = order.menu_pk,
-            menu_name = order.menu.menu_name,
-            menu_count = order.menu_count,
-            menu_price = menu_price,
-            price = price
-        )
-        response.append(order_info)
+        menu = db.query(models.Menu).filter(models.Menu.menu_pk == order.menu_pk).first()
+        if not menu:
+            continue
 
-    return {"orderer_name": orderer.orderer_name,"orders": response, "total_price": total_price}
+        options = db.query(models.Option_).filter(models.Option_.order_details.any(order_detail_pk=order.order_detail_pk)).all()  # 수정
+        options_list = [{"option_name": option.option_name, "option_price": option.option_price} for option in options]
+
+        order_price = menu.menu_price + sum(option.option_price for option in options)
+
+        order_summary = OrderSummary(
+            menu_name=menu.menu_name,
+            menu_price=menu.menu_price,
+            options=options_list,
+            total_price=order_price
+        )
+
+        total_price += order_price
+        total_menu_count += 1
+        response.append(order_summary)
+
+    return {
+        "orderer_name": orderer.orderer_name,
+        "orders": response,
+        "total_menu_count": total_menu_count,
+        "Final payment amount": total_price
+    }
+
 
 
 

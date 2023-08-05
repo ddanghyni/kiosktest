@@ -2,10 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import sys
-sys.path.append('/Users/ddanghyni0425/mysql/main')
+sys.path.append('/Users/ddanghyni0425/kiosktest/kiosk')
 import json
 
-SECRET_FILE = '/Users/ddanghyni0425/mysql/main/secrets.json'
+SECRET_FILE = '/Users/ddanghyni0425/kiosktest/kiosk/secrets.json'
 
 with open(SECRET_FILE, 'r') as f:
     secrets = json.load(f)

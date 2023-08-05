@@ -1,36 +1,48 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
+
+class Option(BaseModel):
+    option_name: str
+    option_price: int
+
+    class Config():
+        from_attributes = True
 
 class OrderCreate(BaseModel):
-    #orderer_id: int
     menu_pk: int
-    menu_count: int
-   
+    options: List[int] = []
 
     class Config():
         from_attributes = True
 
 class OrderResponse(BaseModel):
-    #order_detail_pk: int
     orderer_id: int
     menu_pk: int
     menu_name: str
-    menu_count: int
     menu_price: int
+    options: Optional[List[Option]] = []
     price: int
 
-    
     class Config():
         from_attributes = True
 
+
+
 class OrderSummary(BaseModel):
-    orderer_name: str
-    orders: List[OrderResponse]
-    total_count: int
+    #orderer_id: int
+    #menu_pk: int
+    menu_name: str
+    menu_price: int
+    options: Optional[List[Option]] = []
     total_price: int
 
     class Config():
-        from_attributes = True     
+        from_attributes = True
+
+
+
+
+
 
 
