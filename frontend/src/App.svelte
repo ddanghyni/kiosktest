@@ -148,6 +148,52 @@
     {/if}
   {/if}
 </main>
-
+<style>
+  main {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    max-width: 800px;
+    padding: 20px;
+  }
+  
+  h1, h2, h3, h4 {
+    color: #333;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  
+  input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  ul li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  ul li:last-child {
+    border-bottom: none;
+  }
+  </style>
+  
 
 

@@ -6,8 +6,6 @@ from domain.order import order_router
 #
 
 
-
-
 #
 
 app = FastAPI()
