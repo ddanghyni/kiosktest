@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from domain.menu import menu_router
 from domain.orderer import orderer_router
 from domain.order import order_router
-#
+from domain.recommendation import menu_reco
 
 
 #
@@ -27,3 +27,4 @@ app.add_middleware(
 app.include_router(menu_router.router)
 app.include_router(orderer_router.router)
 app.include_router(order_router.router)
+app.include_router(menu_reco.router)
