@@ -72,7 +72,13 @@ class RecommendedMenu(Base):
 
 
 
-
+class FaceAnalysis(Base):
+    __tablename__ = "face_analysis"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    emotion = Column(String(50), nullable=False)
+    gender = Column(String(50), nullable=False)
+    age = Column(Integer, nullable=False)
 
 
 
