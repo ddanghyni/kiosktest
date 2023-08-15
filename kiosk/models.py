@@ -11,14 +11,11 @@ class Option_(Base):
     option_name = Column(String(50), nullable=False)
     option_price = Column(Integer, nullable=False)
 
-
-# 2. order_option 연결 테이블 선언
-# 2. order_option 연결 테이블 선언
+#!2. order_option 연결 테이블 선언
 order_option = Table(
     'order_option', Base.metadata,
     Column('order_detail_pk', Integer, ForeignKey('kiosk.order_detail.order_detail_pk')),
-    Column('option_pk', Integer, ForeignKey('kiosk.option_.option_pk')) # 수정
-)
+    Column('option_pk', Integer, ForeignKey('kiosk.option_.option_pk')))
 
 
 # 카테고리 목록 테이블
@@ -48,6 +45,8 @@ class Orderer(Base):
     orderer_id = Column(Integer, primary_key=True, index = True)
     orderer_name = Column(String(50), nullable=False)
     orderer_phone = Column(String(50), nullable=False)
+    orderer_gender = Column(String(10), nullable=False)
+    orderer_age = Column(Integer, nullable=False)
     
 
 class OrderDetail(Base):
@@ -57,10 +56,29 @@ class OrderDetail(Base):
     orderer_id = Column(Integer, ForeignKey('kiosk.orderer.orderer_id'))
     menu_pk = Column(Integer, ForeignKey('kiosk.menu.menu_pk'))
     # options 관계 선언
-    options = relationship('Option_', secondary=order_option, backref='order_details')  # 수정
+    options = relationship('Option_', secondary=order_option, backref='order_details') 
+
+
+#! 메뉴 추천을 담당하는 모델
+
+class RecommendedMenu(Base):
+    __tablename__ = 'recommended_menu'
+    __table_args__ = {'schema': 'kiosk'}
+    rec_menu_pk = Column(Integer, primary_key=True, autoincrement=True)
+    age = Column(Integer, nullable=False)
+    gender = Column(String(10), nullable=False)
+    menu_pk = Column(Integer, ForeignKey('kiosk.menu.menu_pk'))
+    menu = relationship('Menu', backref='recommended_menus')
 
 
 
+class FaceAnalysis(Base):
+    __tablename__ = "face_analysis"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    emotion = Column(String(50), nullable=False)
+    gender = Column(String(50), nullable=False)
+    age = Column(Integer, nullable=False)
 
 
 
